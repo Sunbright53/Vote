@@ -30,3 +30,13 @@ export async function submitVote(picks: string[]) {
   return r.json();
 }
 
+// src/api.ts
+export async function checkQrPass(pass: string) {
+  const form = new URLSearchParams();
+  form.set('p', 'api_qr_check');
+  form.set('pass', pass);
+
+  const r = await fetch(BASE, { method: 'POST', body: form }); // form POST → ไม่โดน preflight
+  if (!r.ok) throw new Error('failed qr pass check');
+  return r.json(); // => { ok: boolean }
+}

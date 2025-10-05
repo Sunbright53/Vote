@@ -1,0 +1,5 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Link } from 'react-router-dom';
+export default function Done() {
+    return (_jsxs("div", { className: "mh-wrap", role: "status", "aria-live": "polite", children: [_jsx("h1", { className: "mh-title", children: "THANK YOU" }), _jsx("h2", { className: "mh-subtitle", children: "\u0E02\u0E2D\u0E1A\u0E04\u0E38\u0E13\u0E17\u0E35\u0E48\u0E23\u0E48\u0E27\u0E21\u0E42\u0E2B\u0E27\u0E15" }), _jsx("p", { className: "badge", children: "\u0E23\u0E30\u0E1A\u0E1A\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E04\u0E30\u0E41\u0E19\u0E19\u0E02\u0E2D\u0E07\u0E04\u0E38\u0E13\u0E40\u0E23\u0E35\u0E22\u0E1A\u0E23\u0E49\u0E2D\u0E22\u0E41\u0E25\u0E49\u0E27" }), _jsxs("div", { className: "mh-actions", style: { marginTop: 16, display: 'flex', gap: 12 }, children: [_jsx(Link, { className: "btn primary", to: "/results", children: "\u0E14\u0E39\u0E1C\u0E25\u0E25\u0E48\u0E32\u0E2A\u0E38\u0E14" }), _jsx(Link, { className: "btn ghost", to: "/vote", children: "\u0E01\u0E25\u0E31\u0E1A\u0E44\u0E1B\u0E2B\u0E19\u0E49\u0E32\u0E42\u0E2B\u0E27\u0E15" })] })] }));
+}

@@ -1,0 +1,2 @@
+cd "/Users/ciy_th/Desktop/Voting app/poll-app"
+npm run dev
