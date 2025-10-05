@@ -1,0 +1,340 @@
+/* ==============================
+   GLOBAL STYLES (Dark + Background)
+   ============================== */
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Thai", sans-serif;
+  color: #eaf2ff;
+  background:
+    radial-gradient(1200px 600px at 70% -100px, rgba(23, 48, 94, 0.70) 0%, rgba(23, 48, 94, 0) 60%),
+    linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.9)),
+    url('/Background.png') center center / cover no-repeat fixed,
+    #030617;
+}
+
+/* ---- โทนสีหลัก (รวม var เดิม + Pixel) ---- */
+:root {
+  /* Global palette */
+  --bg: #0b1220;
+  --panel: #0f172a;
+  --panel2: #0b132b;
+  --text: #eaf2ff;
+  --muted: #98a2b3;
+  --primary: #1e40af;
+  --primary-2: #2563eb;
+  --accent: #60a5fa;
+  --success: #16a34a;
+  --error: #b91c1c;
+  --border: #1f2a44;
+
+  /* ===== Pixel UI Theme ===== */
+  --px-green-hi: #d8ffd7;
+  --px-green:    #48c774;    /* โทนเขียวหลัก */
+  --px-green-dk: #2e8b57;    /* เงาด้านล่าง */
+  --px-green-bd: #174a2e;    /* เส้นขอบเข้ม */
+  --px-glow:     0 0 18px rgba(72,199,116,.45), 0 0 36px rgba(72,199,116,.25);
+
+  /* ===== Check on the right, fixed size ===== */
+  --check-size: 32px;  /* ปรับได้ 28–36 ตามใจ */
+  --check-gap: 6px;    /* เว้นจากขอบขวา 6px */
+}
+
+/* ==============================
+   TOP NAV (เมนูกึ่งกลาง + เบลอ)
+   ============================== */
+.mh-topnav{
+  position: sticky; top: 0; z-index: 20;
+  display: flex; justify-content: center; align-items: center;
+  gap: 14px;
+  padding: 14px 10px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,.15));
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+/* ==============================
+   PIXEL BUTTON (ทรงแคปซูล 8-bit glossy)
+   ============================== */
+.pixel-btn{
+  --padY: 10px; --padX: 18px;
+  display: inline-block;
+  padding: var(--padY) var(--padX);
+  border-radius: 9999px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #0f2416; /* ถ้าอยากคอนทราสต์สูง ให้ใช้ #052e16 หรือเพิ่ม text-shadow */
+  background:
+    linear-gradient(to bottom, var(--px-green-hi) 0%, var(--px-green) 45%, var(--px-green-dk) 100%);
+  border: 2px solid var(--px-green-bd);
+  box-shadow:
+    0 2px 0 #0e2a17,
+    0 4px 0 #0a1e11,
+    inset 0 2px 0 rgba(255,255,255,.65),
+    inset 0 -2px 0 rgba(0,0,0,.25);
+  transition: transform .08s ease, box-shadow .12s ease, filter .12s ease;
+}
+
+.pixel-btn:hover{
+  filter: brightness(1.06);
+  box-shadow:
+    0 2px 0 #0e2a17,
+    0 8px 18px rgba(72,199,116,.25),
+    inset 0 2px 0 rgba(255,255,255,.75),
+    inset 0 -2px 0 rgba(0,0,0,.28);
+}
+
+.pixel-btn:active{
+  transform: translateY(2px);
+  box-shadow:
+    0 1px 0 #0e2a17,
+    inset 0 2px 0 rgba(255,255,255,.55),
+    inset 0 -1px 0 rgba(0,0,0,.3);
+}
+
+/* สถานะ NavLink active */
+.pixel-btn.active{
+  box-shadow:
+    0 2px 0 #0e2a17,
+    var(--px-glow),
+    inset 0 2px 0 rgba(255,255,255,.75),
+    inset 0 -2px 0 rgba(0,0,0,.25);
+}
+
+/* รองรับคีย์บอร์ด */
+.pixel-btn:focus-visible{
+  outline: 3px dashed #c1ffd0;
+  outline-offset: 2px;
+}
+
+/* ==============================
+   LAYOUT & TYPOGRAPHY
+   ============================== */
+.mh-wrap {
+  padding: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.mh-title {
+  margin: 6px 0 0;
+  letter-spacing: 0.12em;
+  font-size: 44px;
+  font-weight: 900;
+  text-shadow: 0 2px 30px rgba(96, 165, 250, 0.35);
+}
+
+.mh-subtitle {
+  margin: 6px 0 18px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #d7e3ff;
+}
+
+.mh-instruction {
+  font-size: 18px;
+  margin: 8px 0 14px;
+  color: #c6d4ff;
+}
+
+.grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* =========================
+   GROUP CARD
+   ========================= */
+.group-card {
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.08), rgba(2, 6, 23, 0.6));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  margin: 14px 0 18px;
+}
+
+.group-title {
+  font-weight: 800;
+  color: #dbe7ff;
+  margin-bottom: 10px;
+}
+
+/* =========================
+   VOTE ITEM
+   ========================= */
+.vote-option {
+  position: relative; /* สำหรับวาง .vote-check แบบ absolute */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--panel);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  /* กันข้อความไปชนกล่องเช็กด้านขวา */
+  padding-right: calc(14px + var(--check-size) + 10px);
+  user-select: none;
+}
+
+.vote-option:hover {
+  background: #111a2e;
+  border-color: #29406f;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) inset;
+}
+
+.vote-option.active {
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.22), rgba(30, 64, 175, 0.75));
+  border-color: var(--primary-2);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35);
+  transform: translateY(-1px);
+}
+
+.vote-option.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.vote-text { display: flex; flex-direction: column; gap: 4px; }
+.vote-name { font-weight: 700; font-size: 16px; }
+.vote-id { font-size: 12px; color: var(--muted); }
+
+/* ===== กล่องเช็ก: ขนาดคงที่ ชิดขวา 6px กลางแนวตั้ง ===== */
+.vote-option .vote-check{
+  position: absolute;
+  top: 50%;
+  right: var(--check-gap);
+  transform: translateY(-50%);
+  width: var(--check-size);
+  height: var(--check-size);
+  border-radius: 10px;                 /* ถ้าอยากเหลี่ยมจัด ใช้ 6px */
+  border: 2px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 18px;                     /* ขนาดเครื่องหมายติ๊ก/ไอคอนภายใน */
+  line-height: 1;
+  color: #fff;
+  pointer-events: none;                /* ให้คลิกได้ทั้งการ์ด */
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.08),
+    0 0 0 1px rgba(0,0,0,.12);
+}
+
+/* ตอนถูกเลือก: สี/เรืองแสงสวย ๆ */
+.vote-option.active .vote-check{
+  border-color: rgba(87,138,255,.75);
+  background: linear-gradient(180deg,#5c8dff,#3567ff);
+  box-shadow:
+    0 0 18px rgba(53,103,255,.35),
+    inset 0 2px 0 rgba(255,255,255,.25);
+}
+
+/* รูปภาพผู้เข้าแข่งขัน */
+.avatar {
+  width: 70px; height: 70px;
+  border-radius: 12px;
+  object-fit: cover; flex-shrink: 0;
+  border: 2px solid #3b82f6;
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.25);
+}
+
+/* =========================
+   BUTTONS & BADGES
+   ========================= */
+.btn {
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--panel2);
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn.primary {
+  background: linear-gradient(180deg, var(--primary-2), var(--primary));
+  border-color: var(--primary-2);
+}
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: #cdd8ff;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Action bar */
+.action-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+/* Toast */
+.toast { padding: 6px 10px; border-radius: 8px; font-size: 13px; }
+.toast.success { background: #dcfce7; color: #166534; }
+.toast.error { background: #fee2e2; color: #b91c1c; }
+
+/* =========================
+   ACCESSIBILITY & MOTION
+   ========================= */
+@media (max-width: 480px) {
+  .mh-topnav { gap: 10px; padding: 10px; flex-wrap: wrap; }
+  .pixel-btn { padding: 9px 14px; font-size: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+
+/* ปุ่มโหวตแบบ responsive — ใหญ่บนคอม, พอดีบนมือถือ */
+.vote-btn{
+  /* ขนาดตัวอักษรอิงความกว้างหน้าจอ */
+  font-size: clamp(14px, 1.1vw + 0.35rem, 22px);
+
+  /* ระยะ padding รอบปุ่ม (แนวตั้ง/แนวนอน) ปรับอัตโนมัติ */
+  --padY: clamp(12px, 1.2vw, 18px);
+  --padX: clamp(24px, 2.8vw, 44px);
+  padding: var(--padY) var(--padX);
+
+  /* ความสูงขั้นต่ำ = เป้าหมายแตะนิ้วที่ดี */
+  min-height: clamp(44px, 6.2vw, 64px);
+
+  /* ให้ปุ่มดูแน่นขึ้นบนจอใหญ่ */
+  border-width: 3px;
+}
+
+/* บนจอเล็ก ถ้าต้องการให้ปุ่มกินความกว้างมากขึ้น */
+@media (max-width: 560px){
+  .vote-btn{
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* บนจอใหญ่มาก เพิ่มมวลปุ่มอีกนิด */
+@media (min-width: 1280px){
+  .vote-btn{
+    font-size: clamp(16px, 1.1vw + 0.6rem, 26px);
+    --padY: 10px;
+    --padX: 30px;
+    min-height: 40px;
+  }
+}
