@@ -14,6 +14,7 @@ export default function Vote() {
     const [msg, setMsg] = useState(null);
     const [batch, setBatch] = useState('default'); // รอบงานปัจจุบัน
     const nav = useNavigate();
+    const BASE = import.meta.env.BASE_URL; // dev: "/", prod: "/Vote/"
     /** โหลด roster + settings */
     useEffect(() => {
         (async () => {
@@ -27,8 +28,8 @@ export default function Vote() {
                     setMax(settings.max_picks);
                 const b = String(settings?.current_batch || 'default').trim() || 'default';
                 setBatch(b);
-                // 🔒 ถ้าเครื่องนี้โหวตไปแล้วสำหรับ batch นี้ → เด้งไป /done
-                if (localStorage.getItem(votedKey(b))) {
+                // 🔒 ใช้ sessionStorage เพื่อกันเด้ง /done ข้ามเครื่อง
+                if (sessionStorage.getItem(votedKey(b))) {
                     nav('/done?already=1', { replace: true });
                     return;
                 }
@@ -92,8 +93,8 @@ export default function Vote() {
             setSubmitting(true);
             const res = await submitVote(picks);
             if (res?.ok) {
-                // 🔒 ตั้งล็อกเครื่องสำหรับรอบนี้ แล้วเด้งออกทันที (กันย้อนกลับ)
-                localStorage.setItem(votedKey(batch), new Date().toISOString());
+                // 🔒 ตั้งล็อก session สำหรับรอบนี้ แล้วเด้งออกทันที (กันย้อนกลับ)
+                sessionStorage.setItem(votedKey(batch), new Date().toISOString());
                 nav('/done', { replace: true });
                 return;
             }
@@ -112,7 +113,9 @@ export default function Vote() {
     return (_jsxs("div", { className: "mh-wrap", children: [_jsx("h1", { className: "mh-title", children: "POPULAR VOTE" }), _jsx("h2", { className: "mh-subtitle", children: "\u0E42\u0E2B\u0E27\u0E15\u0E22\u0E2D\u0E14\u0E19\u0E34\u0E22\u0E21" }), _jsxs("h3", { className: "mh-instruction", children: ["(\u0E01\u0E23\u0E38\u0E13\u0E32\u0E40\u0E25\u0E37\u0E2D\u0E01 ", min === max ? `${min}` : `${min}–${max}`, " \u0E04\u0E19 \u0E17\u0E35\u0E48\u0E04\u0E38\u0E13\u0E0A\u0E37\u0E48\u0E19\u0E0A\u0E2D\u0E1A)"] }), empty ? (_jsx(Card, { children: _jsx("p", { className: "badge", children: "\u0E22\u0E31\u0E07\u0E44\u0E21\u0E48\u0E21\u0E35\u0E23\u0E32\u0E22\u0E0A\u0E37\u0E48\u0E2D\u0E2A\u0E33\u0E2B\u0E23\u0E31\u0E1A\u0E42\u0E2B\u0E27\u0E15" }) })) : (groupKeys.map((g) => (_jsxs("div", { className: "group-card", children: [g.trim() ? _jsxs("div", { className: "group-title", children: ["\u0E01\u0E25\u0E38\u0E48\u0E21 ", g] }) : null, _jsx("div", { className: "grid", children: byGroup[g].map((p) => {
                             const checked = !!picked[p.id];
                             const disabled = !checked && totalPicked >= max;
-                            return (_jsxs("label", { className: `vote-option ${checked ? 'active' : ''} ${disabled ? 'disabled' : ''}`, onClick: () => !disabled && toggle(p.id), children: [_jsx("img", { src: p.photo ? `/avatars/${p.photo}` : `/avatars/${p.id}.png`, alt: p.name, className: "avatar", onError: (e) => (e.target.src = '/avatars/default.png') }), _jsxs("div", { className: "vote-text", children: [_jsx("div", { className: "vote-name", children: p.name }), _jsx("div", { className: "vote-id", children: p.id })] }), _jsx("div", { className: "vote-check", children: checked ? '✓' : '' })] }, p.id));
+                            return (_jsxs("label", { className: `vote-option ${checked ? 'active' : ''} ${disabled ? 'disabled' : ''}`, onClick: () => !disabled && toggle(p.id), children: [_jsx("img", { src: p.photo
+                                            ? `${BASE}avatars/${p.photo}`
+                                            : `${BASE}avatars/${p.id}.png`, alt: p.name, className: "avatar", onError: (e) => (e.target.src = `${BASE}avatars/default.png`) }), _jsxs("div", { className: "vote-text", children: [_jsx("div", { className: "vote-name", children: p.name }), _jsx("div", { className: "vote-id", children: p.id })] }), _jsx("div", { className: "vote-check", children: checked ? '✓' : '' })] }, p.id));
                         }) })] }, g)))), _jsxs("div", { className: "action-bar", children: [_jsx("button", { className: "pixel-btn vote-btn", onClick: onSubmit, disabled: submitDisabled, children: submitting ? 'กำลังบันทึก…' : 'โหวต' }), _jsxs("span", { className: "badge", children: ["\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E41\u0E25\u0E49\u0E27 ", totalPicked, "/", max] }), _jsx("span", { className: "badge", children: totalPicked < min
                             ? `ต้องเลือกเพิ่มอีก ${min - totalPicked}`
                             : totalPicked > max

@@ -6,6 +6,22 @@
 
 
 
+
+cd poll-app/src
+rm -f main.js App.js api.js types.js
+cd ..
+rm -rf ../docs dist
+npm run build
+cp dist/index.html dist/404.html
+touch dist/.nojekyll
+mv dist ../docs
+cd ..
+git add -A
+git commit -m "clean build: remove legacy JS and fix router basename"
+git push
+
+
+
 cd "/Users/ciy_th/Desktop/Poll-Vote/poll-app"
 npm install
 npm run dev

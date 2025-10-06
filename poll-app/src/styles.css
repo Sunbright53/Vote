@@ -9,10 +9,11 @@ html, body, #root {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Thai", sans-serif;
   color: #eaf2ff;
   background:
-    radial-gradient(1200px 600px at 70% -100px, rgba(23, 48, 94, 0.70) 0%, rgba(23, 48, 94, 0) 60%),
-    linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.9)),
-    url('/Background.png') center center / cover no-repeat fixed,
-    #030617;
+  radial-gradient(1200px 600px at 70% -100px, rgba(23, 48, 94, 0.70) 0%, rgba(23, 48, 94, 0) 60%),
+  linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.9)),
+  url('./assets/Background.png') center center / cover no-repeat fixed,
+  #030617;
+
 }
 
 /* ---- โทนสีหลัก (รวม var เดิม + Pixel) ---- */

@@ -16,6 +16,7 @@ export default function Vote() {
   const [batch, setBatch] = useState('default'); // รอบงานปัจจุบัน
 
   const nav = useNavigate();
+  const BASE = import.meta.env.BASE_URL; // dev: "/", prod: "/Vote/"
 
   /** โหลด roster + settings */
   useEffect(() => {
@@ -31,8 +32,8 @@ export default function Vote() {
         const b = String(settings?.current_batch || 'default').trim() || 'default';
         setBatch(b);
 
-        // 🔒 ถ้าเครื่องนี้โหวตไปแล้วสำหรับ batch นี้ → เด้งไป /done
-        if (localStorage.getItem(votedKey(b))) {
+        // 🔒 ใช้ sessionStorage เพื่อกันเด้ง /done ข้ามเครื่อง
+        if (sessionStorage.getItem(votedKey(b))) {
           nav('/done?already=1', { replace: true });
           return;
         }
@@ -102,8 +103,8 @@ export default function Vote() {
       setSubmitting(true);
       const res = await submitVote(picks);
       if (res?.ok) {
-        // 🔒 ตั้งล็อกเครื่องสำหรับรอบนี้ แล้วเด้งออกทันที (กันย้อนกลับ)
-        localStorage.setItem(votedKey(batch), new Date().toISOString());
+        // 🔒 ตั้งล็อก session สำหรับรอบนี้ แล้วเด้งออกทันที (กันย้อนกลับ)
+        sessionStorage.setItem(votedKey(batch), new Date().toISOString());
         nav('/done', { replace: true });
         return;
       }
@@ -144,10 +145,16 @@ export default function Vote() {
                     onClick={() => !disabled && toggle(p.id)}
                   >
                     <img
-                      src={p.photo ? `/avatars/${p.photo}` : `/avatars/${p.id}.png`}
+                      src={
+                        p.photo
+                          ? `${BASE}avatars/${p.photo}`
+                          : `${BASE}avatars/${p.id}.png`
+                      }
                       alt={p.name}
                       className="avatar"
-                      onError={(e) => ((e.target as HTMLImageElement).src = '/avatars/default.png')}
+                      onError={(e) =>
+                        ((e.target as HTMLImageElement).src = `${BASE}avatars/default.png`)
+                      }
                     />
                     <div className="vote-text">
                       <div className="vote-name">{p.name}</div>
