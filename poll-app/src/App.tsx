@@ -18,9 +18,7 @@ export default function App() {
         <NavLink to="/results" end className={linkClass}>
           Results
         </NavLink>
-        <NavLink to="/qr" end className={linkClass}>
-          QR
-        </NavLink>
+
       </nav>
 
       <Routes>
