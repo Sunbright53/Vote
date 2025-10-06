@@ -7,8 +7,8 @@ import './styles.css'; // ถ้าต้องการ
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <BrowserRouter basename="/">
+    <BrowserRouter basename="/Poll-Vote">
       <App />
     </BrowserRouter>
   </React.StrictMode>
-);
+)

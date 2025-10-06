@@ -1,5 +1,4 @@
 /// <reference types="node" />
-
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath, URL } from 'node:url'
@@ -11,7 +10,11 @@ export default defineConfig(({ command }) => {
   const isBuild = command === 'build'
   return {
     plugins: [react()],
-    base: isBuild ? '/Poll-Vote/' : '/', // ← ชื่อ repo ต้องตรงเป๊ะ
+    /** 
+     * base: path ของ repo (เวลาจะ deploy ขึ้น GitHub Pages)
+     * เช่น repo ชื่อ Poll-Vote → ต้องเป็น /Poll-Vote/
+     */
+    base: isBuild ? '/Poll-Vote/' : '/',
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
