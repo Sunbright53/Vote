@@ -27,7 +27,7 @@ export default function App() {
         <Route path="/" element={<Vote />} />
         <Route path="/vote" element={<Vote />} />
         <Route path="/results" element={<Results />} />
-        <Route path="/qr" element={<Qr />} />
+        
         <Route path="/done" element={<Done />} /> {/* ← เพิ่ม */}
       </Routes>
     </div>
