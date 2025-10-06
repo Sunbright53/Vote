@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -9,7 +10,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     {/* ใช้ค่าอัตโนมัติตาม Vite:
        - dev = '/'
        - build (GitHub Pages) = '/Poll-Vote/' ตาม vite.config.ts */}
-    <BrowserRouter basename={import.meta.env.BASE_URL}>
+    <BrowserRouter basename="/Vote/">
       <App />
     </BrowserRouter>
   </React.StrictMode>
