@@ -1,0 +1,4 @@
+node_modules/
+poll-app/node_modules/
+poll-app/dist/
+.DS_Store
