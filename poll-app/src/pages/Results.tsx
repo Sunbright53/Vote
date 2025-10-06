@@ -1,17 +1,80 @@
 // src/pages/Results.tsx
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { getResults } from '../api';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { getResults, checkQrPass } from '../api';
 import type { RosterItem } from '../types';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Card } from '../components/Card';
 import { Countdown } from '../components/Countdown';
-import { paletteFor } from '../utils/colors'; // หรือ '@/utils/colors'
+import { paletteFor } from '../utils/colors';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-export default function Results() {
-  // === ใช้ localStorage + ดีฟอลต์ 120 วิ
+/* ========== 1) Guard: ใส่รหัสก่อนเห็นผลโหวต ========== */
+const RESULTS_AUTH_KEY = 'mh_results_auth';
+
+function ResultsGuard({ children }: { children: React.ReactNode }) {
+  const [authed, setAuthed] = useState(false);
+  const [pass, setPass] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    // อนุญาต /results?logout=1 เคลียร์สิทธิ์
+    const u = new URL(window.location.href);
+    if (u.searchParams.get('logout') === '1') {
+      localStorage.removeItem(RESULTS_AUTH_KEY);
+      u.searchParams.delete('logout');
+      window.history.replaceState(null, '', u.toString());
+    }
+    setAuthed(localStorage.getItem(RESULTS_AUTH_KEY) === '1');
+  }, []);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErr(null);
+    if (!pass.trim()) { setErr('กรุณากรอกรหัส'); return; }
+    setLoading(true);
+    try {
+      const res = await checkQrPass(pass.trim());
+      if (res.ok) {
+        localStorage.setItem(RESULTS_AUTH_KEY, '1');
+        setAuthed(true);
+      } else {
+        setErr('รหัสไม่ถูกต้อง');
+      }
+    } catch {
+      setErr('เครือข่ายมีปัญหา ลองใหม่อีกครั้ง');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (authed) return <>{children}</>;
+
+  return (
+    <div className="mh-wrap">
+      <h1 className="mh-title">ใส่รหัสเพื่อดูผลโหวต</h1>
+      <form onSubmit={submit} style={{ display: 'grid', gap: 12, maxWidth: 360 }}>
+        <input
+          type="password"
+          placeholder="รหัสผ่าน (QR pass)"
+          value={pass}
+          onChange={(e) => setPass(e.target.value)}
+          className="input"
+        />
+        <button className="pixel-btn" disabled={loading}>
+          {loading ? 'กำลังตรวจสอบ…' : 'เข้าสู่หน้าแสดงผล'}
+        </button>
+        {err && <span className="toast error">{err}</span>}
+      </form>
+    </div>
+  );
+}
+
+/* ========== 2) เนื้อหา Results เดิม (ย้ายมาเป็น ResultsInner) ========== */
+function ResultsInner() {
+  // ใช้ localStorage + ดีฟอลต์ 120 วิ
   const [refreshSec, setRefreshSec] = useState<number>(() => {
     const saved = Number(localStorage.getItem('results-refresh-sec'));
     return Number.isFinite(saved) && saved > 0 ? saved : 120;
@@ -21,7 +84,6 @@ export default function Results() {
   const [roster, setRoster] = useState<RosterItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // บันทึกค่าเมื่อผู้ใช้เปลี่ยน
   useEffect(() => {
     localStorage.setItem('results-refresh-sec', String(refreshSec));
   }, [refreshSec]);
@@ -31,7 +93,7 @@ export default function Results() {
     [roster]
   );
 
-  // อ่านค่า settings มาใช้ "ครั้งแรก" เท่านั้น (ถ้า localStorage ยังไม่มี)
+  // อ่าน settings มาเติมค่าครั้งแรก ถ้า user ยังไม่เคยปรับ
   const initializedFromSettings = useRef(false);
 
   const refresh = useCallback(async () => {
@@ -55,9 +117,7 @@ export default function Results() {
     }
   }, []);
 
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
+  useEffect(() => { refresh(); }, [refresh]);
 
   // เรียง id ตามคะแนนมาก→น้อย
   const ids = useMemo(
@@ -65,50 +125,34 @@ export default function Results() {
     [counts]
   );
 
-  // ชื่อที่จะแสดงในกราฟ/legend (fallback เป็น id)
   const names = useMemo(() => ids.map((id) => rosterMap[id] ?? id), [ids, rosterMap]);
-
-  // คะแนน
   const values = useMemo(() => ids.map((id) => counts[id] ?? 0), [ids, counts]);
-
-  // พาเล็ตสีคงที่ตามลำดับชื่อ
   const colors = useMemo(() => paletteFor(names), [names]);
 
-  // ข้อมูลกราฟ
   const chartData = useMemo(
     () => ({
       labels: names,
-      datasets: [
-        {
-          data: values,
-          backgroundColor: colors.bg,
-          hoverBackgroundColor: colors.hover,
-          borderColor: colors.border,
-          borderWidth: 2,
-          offset: 2,
-        },
-      ],
+      datasets: [{
+        data: values,
+        backgroundColor: colors.bg,
+        hoverBackgroundColor: colors.hover,
+        borderColor: colors.border,
+        borderWidth: 2,
+        offset: 2,
+      }],
     }),
     [names, values, colors]
   );
 
-  // ปิด legend ของ Chart.js (เราวาดเองด้านขวา) + container สูงแบบ responsive
-  const chartOptions = useMemo(
-    () => ({
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: '58%',
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: (ctx: any) => `${ctx.label}: ${ctx.raw}`,
-          },
-        },
-      },
-    }),
-    []
-  );
+  const chartOptions = useMemo(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '58%',
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (ctx: any) => `${ctx.label}: ${ctx.raw}` } },
+    },
+  }), []);
 
   const totalVotes = useMemo(() => values.reduce((s, n) => s + n, 0), [values]);
 
@@ -128,12 +172,9 @@ export default function Results() {
           />
         </label>
 
-        {/* Countdown จะอ้างอิง refreshSec เสมอ และเรียก refresh เมื่อครบเวลา */}
         <Countdown seconds={refreshSec} onHitZero={refresh} />
 
-        <button className="btn outline" onClick={refresh}>
-          รีเฟรชตอนนี้
-        </button>
+        <button className="btn outline" onClick={refresh}>รีเฟรชตอนนี้</button>
         <span className="badge">รวมโหวต: {totalVotes}</span>
       </div>
 
@@ -143,85 +184,37 @@ export default function Results() {
         ) : values.length === 0 ? (
           <p>ยังไม่มีคะแนน</p>
         ) : (
-          // ====== กราฟโดนัท + legend ด้านขวา ======
           <div
             className="results-wrap"
-            style={{
-              display: 'flex',
-              gap: 16,
-              alignItems: 'stretch',
-              flexWrap: 'wrap',
-            }}
+            style={{ display: 'flex', gap: 16, alignItems: 'stretch', flexWrap: 'wrap' }}
           >
-            {/* พาเนลกราฟ: สูง responsive */}
             <div
               className="chart-panel"
-              style={{
-                position: 'relative',
-                flex: '1 1 420px',
-                minWidth: 320,
-                height: 'min(70vh, 640px)',
-                minHeight: 360,
-              }}
+              style={{ position: 'relative', flex: '1 1 420px', minWidth: 320, height: 'min(70vh, 640px)', minHeight: 360 }}
             >
               <Doughnut data={chartData} options={chartOptions} />
             </div>
 
-            {/* พาเนลรายชื่อ/สี ด้านขวา (เลื่อนดูได้) */}
             <aside
               className="legend-panel"
-              style={{
-                flex: '0 0 320px',
-                maxHeight: 'min(70vh, 640px)',
-                overflowY: 'auto',
-                padding: '8px 6px',
-                borderLeft: '1px solid var(--border)',
-              }}
+              style={{ flex: '0 0 320px', maxHeight: 'min(70vh, 640px)', overflowY: 'auto', padding: '8px 6px', borderLeft: '1px solid var(--border)' }}
             >
-              <div className="legend-title" style={{ fontWeight: 800, margin: '2px 0 10px' }}>
-                รายชื่อ
-              </div>
-              <ul
-                className="color-legend"
-                style={{
-                  listStyle: 'none',
-                  padding: 0,
-                  margin: 0,
-                  display: 'grid',
-                  gap: 6,
-                }}
-              >
+              <div className="legend-title" style={{ fontWeight: 800, margin: '2px 0 10px' }}>รายชื่อ</div>
+              <ul className="color-legend" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 6 }}>
                 {names.map((name, i) => (
                   <li
                     key={`${name}-${i}`}
                     className="legend-item"
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: '18px 1fr auto',
-                      alignItems: 'center',
-                      gap: 8,
-                      padding: '6px 4px',
-                      borderRadius: 8,
-                      background: 'rgba(255,255,255,0.02)',
-                    }}
+                    style={{ display: 'grid', gridTemplateColumns: '18px 1fr auto', alignItems: 'center', gap: 8, padding: '6px 4px', borderRadius: 8, background: 'rgba(255,255,255,0.02)' }}
                   >
                     <span
                       className="swatch"
-                      style={{
-                        width: 14,
-                        height: 14,
-                        borderRadius: 4,
-                        background: colors.bg[i],
-                        border: `2px solid ${colors.border[i]}`,
-                        display: 'inline-block',
-                      }}
+                      style={{ width: 14, height: 14, borderRadius: 4, background: colors.bg[i], border: `2px solid ${colors.border[i]}`, display: 'inline-block' }}
                     />
                     <span className="name" title={name} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {name}
                     </span>
-                    <span className="val" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                      {values[i]}
-                    </span>
+                    <span className="val" style={{ fontVariantNumeric: 'tabular-nums' }}>{values[i]}</span>
                   </li>
                 ))}
               </ul>
@@ -230,5 +223,14 @@ export default function Results() {
         )}
       </Card>
     </div>
+  );
+}
+
+/* ========== 3) Export: ครอบ Guard ========== */
+export default function ResultsPage() {
+  return (
+    <ResultsGuard>
+      <ResultsInner />
+    </ResultsGuard>
   );
 }
