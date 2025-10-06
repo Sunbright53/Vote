@@ -10,20 +10,14 @@ export default defineConfig(({ command }) => {
   const isBuild = command === 'build'
   return {
     plugins: [react()],
-    /** 
-     * base: path ของ repo (เวลาจะ deploy ขึ้น GitHub Pages)
-     * เช่น repo ชื่อ Poll-Vote → ต้องเป็น /Poll-Vote/
-     */
-    base: isBuild ? '/Poll-Vote/' : '/',
+    // dev = '/', build = '/Vote/' ตามชื่อ repo ใหม่
+    base: isBuild ? '/Vote/' : '/',
     resolve: {
-      alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url)),
-      },
+      alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
     },
     server: {
       port: 5173,
       proxy: {
-        // ใช้ได้เฉพาะตอน dev
         '/gas': {
           target: 'https://script.google.com',
           changeOrigin: true,
@@ -32,5 +26,4 @@ export default defineConfig(({ command }) => {
       },
     },
   }
-  }
-)
+}) // 👈 ปิดด้วย "})" เท่านั้น
