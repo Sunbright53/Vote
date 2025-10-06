@@ -9,54 +9,25 @@ import { paletteFor } from '../utils/colors';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-/* ========== 1) Guard: ใส่รหัสก่อนเห็นผลโหวต (ต่อรอบงาน + มีอายุ) ========== */
-const resultAuthKey = (batch: string) => `mh_results_auth_${batch}`;
-type AuthCache = { ok: 1; exp: number }; // exp = epoch ms
-
-function readAuth(batch: string): boolean {
-  try {
-    const raw = localStorage.getItem(resultAuthKey(batch));
-    if (!raw) return false;
-    const obj = JSON.parse(raw) as AuthCache;
-    return obj?.ok === 1 && obj.exp > Date.now();
-  } catch {
-    return false;
-  }
-}
-
-function writeAuth(batch: string, hours = 12) {
-  const exp = Date.now() + hours * 60 * 60 * 1000;
-  localStorage.setItem(resultAuthKey(batch), JSON.stringify({ ok: 1, exp }));
-}
-
+/* ========== Guard: ต้องใส่รหัสทุกครั้ง (ไม่จำค่า) ========== */
 function ResultsGuard({ children }: { children: React.ReactNode }) {
-  const [batch, setBatch] = useState<string>('default');
   const [authed, setAuthed] = useState(false);
   const [pass, setPass] = useState('');
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  // โหลด batch จาก settings ครั้งเดียว แล้วเช็คสิทธิ์ตาม batch
   useEffect(() => {
-    (async () => {
+    // กันเคสดีบัก: เคลียร์คีย์เก่าๆ ถ้าเคยใช้วิธีจำสิทธิ์มาก่อน
+    try {
+      Object.keys(localStorage)
+        .filter((k) => k.startsWith('mh_results_auth'))
+        .forEach((k) => localStorage.removeItem(k));
       const u = new URL(window.location.href);
-      try {
-        const { settings } = await getResults();
-        const b = String(settings?.current_batch || 'default').trim() || 'default';
-        setBatch(b);
-
-        // ?logout=1 เพื่อล้างเฉพาะคีย์ของรอบนี้
-        if (u.searchParams.get('logout') === '1') {
-          localStorage.removeItem(resultAuthKey(b));
-          u.searchParams.delete('logout');
-          window.history.replaceState(null, '', u.toString());
-        }
-
-        setAuthed(readAuth(b));
-      } catch {
-        setAuthed(readAuth('default'));
+      if (u.searchParams.get('logout') === '1') {
+        u.searchParams.delete('logout');
+        window.history.replaceState(null, '', u.toString());
       }
-    })();
+    } catch {}
   }, []);
 
   const submit = async (e: React.FormEvent) => {
@@ -65,13 +36,9 @@ function ResultsGuard({ children }: { children: React.ReactNode }) {
     if (!pass.trim()) { setErr('กรุณากรอกรหัส'); return; }
     setLoading(true);
     try {
-      const res = await checkQrPass(pass.trim()); // ตรวจกับ GAS/ชีต
-      if (res.ok) {
-        writeAuth(batch, 12);    // ผูกกับ batch และหมดอายุใน 12 ชม.
-        setAuthed(true);
-      } else {
-        setErr('รหัสไม่ถูกต้อง');
-      }
+      const res = await checkQrPass(pass.trim()); // ตรวจกับ GAS/ชีต "ทุกครั้ง"
+      if (res.ok) setAuthed(true);
+      else setErr('รหัสไม่ถูกต้อง');
     } catch {
       setErr('เครือข่ายมีปัญหา ลองใหม่อีกครั้ง');
     } finally {
@@ -97,19 +64,11 @@ function ResultsGuard({ children }: { children: React.ReactNode }) {
         </button>
         {err && <span className="toast error">{err}</span>}
       </form>
-
-      {/* ปุ่มล้างสิทธิ์เฉพาะรอบนี้ (เผื่อดีบัก) */}
-      <button
-        className="btn outline mt-3"
-        onClick={() => { localStorage.removeItem(resultAuthKey(batch)); setAuthed(false); }}
-      >
-        ล้างสิทธิ์รอบนี้
-      </button>
     </div>
   );
 }
 
-/* ========== 2) เนื้อหา Results เดิม ========== */
+/* ========== เนื้อหา Results (กราฟ + รายชื่อ) ========== */
 function ResultsInner() {
   // ใช้ localStorage + ดีฟอลต์ 120 วิ
   const [refreshSec, setRefreshSec] = useState<number>(() => {
@@ -263,7 +222,7 @@ function ResultsInner() {
   );
 }
 
-/* ========== 3) Export: ครอบ Guard ========== */
+/* ========== Export: ครอบ Guard ========== */
 function ResultsPage() {
   return (
     <ResultsGuard>
@@ -271,5 +230,4 @@ function ResultsPage() {
     </ResultsGuard>
   );
 }
-
 export default ResultsPage;
