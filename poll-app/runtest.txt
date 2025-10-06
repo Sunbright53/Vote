@@ -1,2 +1,11 @@
-cd "/Users/ciy_th/Desktop/Voting app/poll-app"
+// 🔒 ถ้าเครื่องนี้โหวตไปแล้วสำหรับ batch นี้ → เด้งไป /done
+        // if (localStorage.getItem(votedKey(b))) {
+        //   nav('/done?already=1', { replace: true });
+        //   return;
+        // }
+
+
+
+cd "/Users/ciy_th/Desktop/Poll-Vote/poll-app"
+npm install
 npm run dev
