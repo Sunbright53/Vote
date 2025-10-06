@@ -32,10 +32,10 @@ export default function Vote() {
         setBatch(b);
 
         // 🔒 ถ้าเครื่องนี้โหวตไปแล้วสำหรับ batch นี้ → เด้งไป /done
-        // if (localStorage.getItem(votedKey(b))) {
-        //   nav('/done?already=1', { replace: true });
-        //   return;
-        // }
+        if (localStorage.getItem(votedKey(b))) {
+          nav('/done?already=1', { replace: true });
+          return;
+        }
       } catch {
         setMsg({ type: 'error', text: 'โหลดรายชื่อไม่สำเร็จ' });
       } finally {
