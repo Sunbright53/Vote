@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "pages:prep": "cp dist/index.html dist/404.html && touch dist/.nojekyll",
+    "deploy": "npm run build && npm run pages:prep && cd .. && rm -rf docs && mv poll-app/dist docs && git add -A && git commit -m \"deploy\" || echo nochanges && git push && cd -"
   },
   "dependencies": {
     "chart.js": "^4.4.6",
