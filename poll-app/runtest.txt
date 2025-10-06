@@ -17,7 +17,7 @@ touch dist/.nojekyll
 mv dist ../docs
 cd ..
 git add -A
-git commit -m "clean build: remove legacy JS and fix router basename"
+git commit -m "hide button, when we finish vote"
 git push
 
 
