@@ -4,6 +4,10 @@ import Vote from './pages/Vote';
 import Results from './pages/Results';
 import Qr from './pages/Qr';
 import Done from './pages/Done'; // ← เพิ่ม
+import RequireNotVoted from './pages/RequireNotVoted';
+import HomeRedirect from './pages/HomeRedirect';
+
+
 
 export default function App() {
   const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -22,6 +26,15 @@ export default function App() {
       </nav>
 
       <Routes>
+        <Route path="/" element={<HomeRedirect />} />
+        <Route
+          path="/vote"
+          element={
+            <RequireNotVoted>
+              <Vote />
+            </RequireNotVoted>
+          }
+        />
         <Route path="/" element={<Vote />} />
         <Route path="/vote" element={<Vote />} />
         <Route path="/results" element={<Results />} />

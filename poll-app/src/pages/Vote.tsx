@@ -3,8 +3,7 @@ import { getRoster, submitVote } from '../api';
 import type { RosterItem } from '../types';
 import { Card } from '../components/Card';
 import { useNavigate } from 'react-router-dom';
-import { votedKey } from '../utils/lock';
-
+import { votedKey, rememberBatch, markVoted } from '@/utils/lock';
 export default function Vote() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -32,6 +31,7 @@ export default function Vote() {
         const b = String(settings?.current_batch || 'default').trim() || 'default';
         setBatch(b);
 
+        rememberBatch(b); // ← เพิ่มบรรทัดนี้ไว้ใต้ setBatch(b)
         // 🔒 ใช้ sessionStorage เพื่อกันเด้ง /done ข้ามเครื่อง
         if (sessionStorage.getItem(votedKey(b))) {
           nav('/done?already=1', { replace: true });
@@ -104,8 +104,8 @@ export default function Vote() {
       const res = await submitVote(picks);
       if (res?.ok) {
         // 🔒 ตั้งล็อก session สำหรับรอบนี้ แล้วเด้งออกทันที (กันย้อนกลับ)
-        sessionStorage.setItem(votedKey(batch), new Date().toISOString());
-        nav('/done', { replace: true });
+        markVoted(batch);  // ← ใช้ util เพื่อบันทึกว่าเครื่องนี้โหวตแล้ว
+nav('/done', { replace: true });
         return;
       }
       setMsg({ type: 'error', text: String(res?.error || 'บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง') });
